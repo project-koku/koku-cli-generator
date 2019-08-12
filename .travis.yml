@@ -1,0 +1,28 @@
+language: minimal
+sudo: false
+
+stages:
+  - name: build container
+    if: branch != master AND tag IS blank
+  - name: build and push container
+    if: (branch = master) OR (tag IS present)
+
+jobs:
+  include:
+    - stage: build container
+      services: docker
+      sudo: required
+      script:
+        - docker build .
+    - stage: build and push container
+      services: docker
+      sudo: required
+      script:
+        - set -e
+        - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+        - if [ $TRAVIS_BRANCH == "master" ]; then
+            docker build -t infinitewarp/koku-cli-generator:latest .;
+          else
+            docker build -t infinitewarp/koku-cli-generator:$TRAVIS_TAG .;
+          fi
+        - docker push infinitewarp/koku-cli-generator

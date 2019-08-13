@@ -42,5 +42,5 @@ git rm -r --force --ignore-unmatch "${GENERATE_DIR}"
 
 # Commit and push any changes up to GitHub.
 git add "${GENERATE_DIR}"
-git commit -m "generate ${GENERATOR_TYPE} code based on latest ${API_JSON_URL}"
+git commit -m "generate ${GENERATOR_TYPE} code" -m "based on latest ${API_JSON_URL}"
 git push origin "${REPO_BRANCH}"

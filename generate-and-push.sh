@@ -3,12 +3,17 @@
 REQUIRED=(
     API_AUTH_USERNAME API_AUTH_PASSWORD API_JSON_URL
     COMMITTER_EMAIL COMMITTER_NAME REPO_BRANCH
-    GITHUB_USERNAME GITHUB_PASSWORD
 )
 unset FAIL
 for VAR_NAME in ${REQUIRED[@]}; do
     [ -z "${!VAR_NAME}" ] && echo "missing " ${!VAR_NAME} && FAIL=1
 done
+
+if [[ -z "${GITHUB_TOKEN}" ]] && { [ -z "${GITHUB_USERNAME}" ] || [ -z "${GITHUB_PASSWORD}" ]; }; then
+  echo "Either provider a GITHUB_TOKEN, or GITHUB_USERNAME and GITHUB_PASSWORD"
+  FAIL=1
+fi
+
 # If any of those were not set, exit early.
 [ -z "${FAIL}" ] || exit 1
 
@@ -18,7 +23,13 @@ done
 
 API_JSON="/tmp/openapi.json"
 REPO_DIR="/tmp/koku-cli-git"
-REPO_URL="https://${GITHUB_USERNAME}:${GITHUB_PASSWORD}@github.com/${GITHUB_REPO_PATH}.git"
+
+if [[ -z "${GITHUB_TOKEN}" ]]; then
+    REPO_URL="https://${GITHUB_USERNAME}:${GITHUB_PASSWORD}@github.com/${GITHUB_REPO_PATH}.git"
+else
+    REPO_URL="https://${GITHUB_TOKEN}@github.com/${GITHUB_REPO_PATH}.git"
+fi
+
 GENERATE_DIR="${REPO_DIR}/client-${GENERATOR_TYPE}"
 
 # If any command fails, exit early.
